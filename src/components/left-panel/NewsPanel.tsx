@@ -1,21 +1,35 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { mockNews } from '@/data/news';
 import { groupNewsBySource } from '@/utils/riskUtils';
 import { formatRelativeTime } from '@/utils/dateUtils';
 import { sanitizeExternalUrl } from '@/utils/urlSecurity';
 import SeverityBadge from '@/components/ui/SeverityBadge';
 import { useDashboard } from '@/context/DashboardContext';
+import { useCurrentDiseaseData } from '@/hooks/useCurrentDiseaseData';
+import { fetchMergedNews } from '@/services/newsService';
+import type { NewsItem } from '@/types';
 
 export default function NewsPanel() {
   const [search, setSearch] = useState('');
   const [filterSource, setFilterSource] = useState<string | null>(null);
   const { state } = useDashboard();
+  const { news: mockNews } = useCurrentDiseaseData();
+  const [liveNews, setLiveNews] = useState<NewsItem[]>(mockNews);
+  const [isLoadingLive, setIsLoadingLive] = useState(false);
+
+  // Fetch live news whenever disease changes
+  useEffect(() => {
+    setLiveNews(mockNews);   // immediately show mock while loading
+    setIsLoadingLive(true);
+    fetchMergedNews(state.currentDisease)
+      .then(setLiveNews)
+      .finally(() => setIsLoadingLive(false));
+  }, [state.currentDisease, mockNews]);
 
   const filtered = useMemo(() => {
-    let items = [...mockNews];
+    let items = [...liveNews];
 
     // If a country is selected, show related news first
     if (state.selectedCountry) {
@@ -40,15 +54,22 @@ export default function NewsPanel() {
     }
 
     return items;
-  }, [search, filterSource, state.selectedCountry]);
+  }, [search, filterSource, state.selectedCountry, liveNews]);
 
   const grouped = useMemo(() => groupNewsBySource(filtered), [filtered]);
-  const sources = useMemo(() => [...new Set(mockNews.map((n) => n.source))], []);
+  const sources = useMemo(() => [...new Set(liveNews.map((n) => n.source))], [liveNews]);
 
   return (
     <div className="flex flex-col h-full">
       {/* Search */}
       <div className="p-3 border-b border-white/[0.05]">
+        {/* Live indicator */}
+        {isLoadingLive && (
+          <div className="flex items-center gap-1.5 text-[9px] font-mono text-cyan-600 mb-1.5">
+            <span className="w-1 h-1 rounded-full bg-cyan-400 animate-pulse" />
+            Fetching live data...
+          </div>
+        )}
         <input
           type="text"
           placeholder="Filter news..."

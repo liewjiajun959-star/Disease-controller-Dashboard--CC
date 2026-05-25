@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import AlertCard from './AlertCard';
+import DiseaseSelector from '@/components/disease-selector/DiseaseSelector';
 import type { AlertCard as AlertCardType } from '@/types';
 
 // Mock alert data for the top intelligence bar
@@ -96,6 +97,9 @@ export default function TopIntelligenceBar() {
             <div className="text-[9px] font-mono text-slate-600 mt-0.5 uppercase tracking-wider">Real-time outbreak signals</div>
           </div>
         </div>
+
+        {/* Disease selector */}
+        <DiseaseSelector />
 
         {/* Scrollable alert cards */}
         <div className="flex-1 overflow-hidden relative">

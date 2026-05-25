@@ -4,7 +4,8 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import createGlobe from 'cobe';
 import { useDashboard } from '@/context/DashboardContext';
 import { useCluster } from '@/context/ClusterContext';
-import { mockCountries } from '@/data/countries';
+import { useCurrentDiseaseData } from '@/hooks/useCurrentDiseaseData';
+import { DISEASE_CONFIGS } from '@/data/diseases';
 import { getRiskColor, getRiskMarkerSize } from '@/utils/riskUtils';
 import type { CountryOutbreak } from '@/types';
 import RiskBadge from '@/components/ui/RiskBadge';
@@ -64,8 +65,15 @@ export default function GlobeCore() {
   const { state, selectCountry, toggleRotation } = useDashboard();
   const { state: clusterState } = useCluster();
   const { log } = useUsageLogger();
+  const data = useCurrentDiseaseData();
   const [hoverInfo, setHoverInfo] = useState<HoverInfo | null>(null);
   const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
+
+  // Keep a ref to current countries so updateMarkers/click handlers always use latest
+  const countriesRef = useRef(data.countries);
+  useEffect(() => {
+    countriesRef.current = data.countries;
+  }, [data.countries]);
 
   // Sync refs with latest state values (no re-render triggered)
   useEffect(() => {
@@ -95,7 +103,7 @@ export default function GlobeCore() {
     const { width, height } = dimensions;
     const selCode = selectedCodeRef.current;
 
-    for (const country of mockCountries) {
+    for (const country of countriesRef.current) {
       const el = markerRefs.current.get(country.code);
       if (!el) continue;
 
@@ -134,15 +142,16 @@ export default function GlobeCore() {
     updateMarkersRef.current = updateMarkers;
   }, [updateMarkers]);
 
-  // Initialize globe — only recreates when dimensions change
+  // Initialize globe — recreates when dimensions or disease changes
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const { width, height } = dimensions;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const diseaseConfig = DISEASE_CONFIGS[state.currentDisease];
 
-    const markers = mockCountries.map((c) => ({
+    const markers = countriesRef.current.map((c) => ({
       location: [c.coordinates.lat, c.coordinates.lng] as [number, number],
       size: getRiskMarkerSize(c.totalCases) * 0.5,
     }));
@@ -158,8 +167,8 @@ export default function GlobeCore() {
       mapSamples: 18000,
       mapBrightness: 5,
       baseColor: [0.05, 0.08, 0.2] as [number, number, number],
-      markerColor: [0.2, 0.8, 1] as [number, number, number],
-      glowColor: [0.08, 0.25, 0.6] as [number, number, number],
+      markerColor: diseaseConfig.globeMarkerColor,
+      glowColor: diseaseConfig.globeGlowColor,
       markers,
       onRender: (cobeState) => {
         // Smooth rotation toward target country
@@ -184,7 +193,8 @@ export default function GlobeCore() {
     return () => {
       globe.destroy();
     };
-  }, [dimensions]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dimensions, state.currentDisease]);
 
   // Resize observer
   useEffect(() => {
@@ -216,7 +226,7 @@ export default function GlobeCore() {
       let nearest: CountryOutbreak | null = null;
       let nearestDist = Infinity;
 
-      for (const country of mockCountries) {
+      for (const country of countriesRef.current) {
         const pos = project(
           country.coordinates.lat,
           country.coordinates.lng,
@@ -260,7 +270,7 @@ export default function GlobeCore() {
       let nearestDist = Infinity;
       let nearestPos = { x: 0, y: 0 };
 
-      for (const country of mockCountries) {
+      for (const country of countriesRef.current) {
         const pos = project(
           country.coordinates.lat,
           country.coordinates.lng,
@@ -306,7 +316,7 @@ export default function GlobeCore() {
 
         {/* Overlay markers */}
         <div className="absolute inset-0 pointer-events-none">
-          {mockCountries.map((country) => {
+          {data.countries.map((country) => {
             const color = getRiskColor(country.riskLevel);
             const isSelected = country.code === state.selectedCountry?.code;
             return (

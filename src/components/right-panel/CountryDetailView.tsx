@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion';
 import type { CountryOutbreak } from '@/types';
-import { mockClusters } from '@/data/clusters';
-import { mockPatients } from '@/data/patients';
+import { useCurrentDiseaseData } from '@/hooks/useCurrentDiseaseData';
+import { useDashboard } from '@/context/DashboardContext';
 import RiskBadge from '@/components/ui/RiskBadge';
 import { getRiskColor } from '@/utils/riskUtils';
 import { formatShortDate, formatMonthDay } from '@/utils/dateUtils';
@@ -31,10 +31,12 @@ const EXPOSURE_LABEL: Record<string, string> = {
 };
 
 export default function CountryDetailView({ country }: CountryDetailViewProps) {
-  const clusters = mockClusters.filter((c) => c.countryCode === country.code);
-  const patients = mockPatients.filter((p) => p.countryCode === country.code);
+  const { clusters, patients } = useCurrentDiseaseData();
+  const { selectRegion } = useDashboard();
+  const countryClusters = clusters.filter((c) => c.countryCode === country.code);
+  const countryPatients = patients.filter((p) => p.countryCode === country.code);
   const color = getRiskColor(country.riskLevel);
-  const strainColor = STRAIN_COLORS[country.hantavirusStrain] ?? '#94a3b8';
+  const strainColor = STRAIN_COLORS[country.strainName] ?? '#94a3b8';
 
   // Sparkline for case timeline
   const series = country.casesTimeSeries;
@@ -117,24 +119,36 @@ export default function CountryDetailView({ country }: CountryDetailViewProps) {
 
         {/* Strain info */}
         <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] p-3">
-          <div className="text-[9px] font-mono text-slate-600 uppercase tracking-wider mb-1.5">Hantavirus Strain</div>
+          <div className="text-[9px] font-mono text-slate-600 uppercase tracking-wider mb-1.5">Pathogen Strain</div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: strainColor }} />
             <span className="text-xs font-semibold" style={{ color: strainColor }}>
-              {country.hantavirusStrain}
+              {country.strainName}
             </span>
           </div>
           <div className="mt-2">
-            <div className="text-[9px] font-mono text-slate-600 uppercase tracking-wider mb-1">Affected Regions</div>
+            <div className="text-[9px] font-mono text-slate-600 uppercase tracking-wider mb-1">
+              Affected Regions — click to drill down
+            </div>
             <div className="flex flex-wrap gap-1">
-              {country.affectedRegions.map((r) => (
-                <span
-                  key={r}
-                  className="text-[10px] font-mono text-slate-400 bg-white/[0.04] border border-white/[0.06] px-1.5 py-0.5 rounded"
-                >
-                  {r}
-                </span>
-              ))}
+              {country.affectedRegions.map((r) => {
+                const regionCases = countryClusters
+                  .filter((c) => c.region === r)
+                  .reduce((sum, c) => sum + c.caseCount, 0);
+                return (
+                  <button
+                    key={r}
+                    onClick={() => selectRegion(r)}
+                    className="text-[10px] font-mono text-cyan-400 bg-cyan-500/[0.07] border border-cyan-500/20 px-2 py-0.5 rounded hover:bg-cyan-500/[0.14] hover:border-cyan-500/40 transition-all flex items-center gap-1.5"
+                  >
+                    <span>{r}</span>
+                    {regionCases > 0 && (
+                      <span className="text-[9px] text-cyan-600">{regionCases}</span>
+                    )}
+                    <span className="text-cyan-700">›</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -184,13 +198,13 @@ export default function CountryDetailView({ country }: CountryDetailViewProps) {
         </div>
 
         {/* Clusters */}
-        {clusters.length > 0 && (
+        {countryClusters.length > 0 && (
           <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] p-3">
             <div className="text-[9px] font-mono text-slate-600 uppercase tracking-wider mb-2">
-              Known Clusters ({clusters.length})
+              Known Clusters ({countryClusters.length})
             </div>
             <div className="space-y-2">
-              {clusters.map((cluster) => (
+              {countryClusters.map((cluster) => (
                 <div
                   key={cluster.id}
                   className="rounded p-2 bg-white/[0.03] border border-white/[0.05]"
@@ -223,13 +237,13 @@ export default function CountryDetailView({ country }: CountryDetailViewProps) {
         )}
 
         {/* Anonymous patient chain */}
-        {patients.length > 0 && (
+        {countryPatients.length > 0 && (
           <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] p-3">
             <div className="text-[9px] font-mono text-slate-600 uppercase tracking-wider mb-2">
               Patient Relationship Chain (Anonymized)
             </div>
             <div className="space-y-1.5">
-              {patients.map((p) => (
+              {countryPatients.map((p) => (
                 <div
                   key={p.id}
                   className="flex items-center gap-2 text-[10px] p-1.5 rounded bg-white/[0.02]"

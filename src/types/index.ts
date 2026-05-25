@@ -6,6 +6,29 @@ export type PanelTab = 'news' | 'breakthroughs' | 'announcements';
 export type SourceType = 'mock' | 'youtube';
 export type TrendDirection = 'rising' | 'stable' | 'declining';
 
+// ─── Disease ──────────────────────────────────────────────────────────────────
+
+export type DiseaseType = 'hantavirus' | 'mpox' | 'covid19' | 'ebola';
+
+export interface DiseaseConfig {
+  id: DiseaseType;
+  label: string;          // e.g. "Hantavirus"
+  shortLabel: string;     // e.g. "HANTA"
+  icon: string;           // emoji / symbol
+  accentColor: string;    // CSS hex for active border/background tint
+  globeGlowColor: [number, number, number];   // cobe RGB 0–1
+  globeMarkerColor: [number, number, number]; // cobe RGB 0–1
+}
+
+export interface DiseaseDataset {
+  countries: CountryOutbreak[];
+  news: NewsItem[];
+  clusters: Cluster[];
+  patients: Patient[];
+  breakthroughs: Breakthrough[];
+  announcements: HealthAnnouncement[];
+}
+
 // ─── Geo ──────────────────────────────────────────────────────────────────────
 
 export interface GeoCoordinate {
@@ -42,7 +65,7 @@ export interface CountryOutbreak {
   lastUpdated: string; // ISO 8601
   videoNewsCount: number;
   trend: TrendDirection;
-  hantavirusStrain: string;
+  strainName: string;
   affectedRegions: string[];
   casesTimeSeries: TimeSeriesPoint[];
 }
@@ -56,6 +79,7 @@ export interface Cluster {
   id: string;
   countryCode: string;
   name: string;
+  region: string;          // Administrative region / province name
   coordinates: GeoCoordinate;
   firstDetected: string; // ISO 8601
   status: 'active' | 'contained' | 'monitoring';

@@ -15,7 +15,7 @@ export const mockCountries: CountryOutbreak[] = [
     lastUpdated: '2025-05-24T08:14:00Z',
     videoNewsCount: 4,
     trend: 'rising',
-    hantavirusStrain: 'Bangkok Strain (Novel)',
+    strainName: 'Bangkok Strain (Novel)',
     affectedRegions: ['Udon Thani', 'Chiang Rai', 'Nakhon Ratchasima'],
     casesTimeSeries: [
       { date: '2025-05-16', cases: 1 }, { date: '2025-05-17', cases: 4 },
@@ -39,7 +39,7 @@ export const mockCountries: CountryOutbreak[] = [
     lastUpdated: '2025-05-24T05:33:00Z',
     videoNewsCount: 3,
     trend: 'rising',
-    hantavirusStrain: 'Andes Virus (ANDV)',
+    strainName: 'Andes Virus (ANDV)',
     affectedRegions: ['Santa Cruz Province', 'Beni Department'],
     casesTimeSeries: [
       { date: '2025-05-10', cases: 3 }, { date: '2025-05-13', cases: 9 },
@@ -61,7 +61,7 @@ export const mockCountries: CountryOutbreak[] = [
     lastUpdated: '2025-05-23T22:10:00Z',
     videoNewsCount: 3,
     trend: 'stable',
-    hantavirusStrain: 'Hantaan Virus (HTNV)',
+    strainName: 'Hantaan Virus (HTNV)',
     affectedRegions: ['Gyeonggi Province', 'Gangwon'],
     casesTimeSeries: [
       { date: '2025-05-12', cases: 2 }, { date: '2025-05-15', cases: 8 },
@@ -83,7 +83,7 @@ export const mockCountries: CountryOutbreak[] = [
     lastUpdated: '2025-05-24T01:45:00Z',
     videoNewsCount: 4,
     trend: 'stable',
-    hantavirusStrain: 'Sin Nombre Virus (SNV)',
+    strainName: 'Sin Nombre Virus (SNV)',
     affectedRegions: ['New Mexico', 'Colorado', 'Arizona'],
     casesTimeSeries: [
       { date: '2025-04-28', cases: 1 }, { date: '2025-05-02', cases: 4 },
@@ -106,7 +106,7 @@ export const mockCountries: CountryOutbreak[] = [
     lastUpdated: '2025-05-23T18:22:00Z',
     videoNewsCount: 3,
     trend: 'declining',
-    hantavirusStrain: 'Andes Virus (ANDV)',
+    strainName: 'Andes Virus (ANDV)',
     affectedRegions: ['Patagonia', 'Neuquén'],
     casesTimeSeries: [
       { date: '2025-05-01', cases: 2 }, { date: '2025-05-06', cases: 8 },
@@ -128,7 +128,7 @@ export const mockCountries: CountryOutbreak[] = [
     lastUpdated: '2025-05-21T14:00:00Z',
     videoNewsCount: 2,
     trend: 'declining',
-    hantavirusStrain: 'Puumala Virus (PUUV)',
+    strainName: 'Puumala Virus (PUUV)',
     affectedRegions: ['Baden-Württemberg', 'Bavaria'],
     casesTimeSeries: [
       { date: '2025-04-20', cases: 1 }, { date: '2025-04-27', cases: 4 },
@@ -150,7 +150,7 @@ export const mockCountries: CountryOutbreak[] = [
     lastUpdated: '2025-05-23T20:15:00Z',
     videoNewsCount: 3,
     trend: 'rising',
-    hantavirusStrain: 'Andes Virus (ANDV)',
+    strainName: 'Andes Virus (ANDV)',
     affectedRegions: ['Araucanía Region', 'Los Ríos Region'],
     casesTimeSeries: [
       { date: '2025-05-05', cases: 1 }, { date: '2025-05-09', cases: 5 },
@@ -172,7 +172,7 @@ export const mockCountries: CountryOutbreak[] = [
     lastUpdated: '2025-05-22T16:40:00Z',
     videoNewsCount: 3,
     trend: 'stable',
-    hantavirusStrain: 'Juquitiba Virus (JUQV)',
+    strainName: 'Juquitiba Virus (JUQV)',
     affectedRegions: ['São Paulo State', 'Minas Gerais', 'Paraná'],
     casesTimeSeries: [
       { date: '2025-04-15', cases: 2 }, { date: '2025-04-22', cases: 7 },
@@ -195,7 +195,7 @@ export const mockCountries: CountryOutbreak[] = [
     lastUpdated: '2025-05-23T04:00:00Z',
     videoNewsCount: 2,
     trend: 'stable',
-    hantavirusStrain: 'Hantaan Virus (HTNV)',
+    strainName: 'Hantaan Virus (HTNV)',
     affectedRegions: ['Heilongjiang Province', 'Shandong Province'],
     casesTimeSeries: [
       { date: '2025-04-10', cases: 3 }, { date: '2025-04-17', cases: 9 },
@@ -218,7 +218,7 @@ export const mockCountries: CountryOutbreak[] = [
     lastUpdated: '2025-05-20T10:30:00Z',
     videoNewsCount: 2,
     trend: 'stable',
-    hantavirusStrain: 'Puumala Virus (PUUV)',
+    strainName: 'Puumala Virus (PUUV)',
     affectedRegions: ['Dalarna County', 'Gävleborg County'],
     casesTimeSeries: [
       { date: '2025-05-08', cases: 1 }, { date: '2025-05-12', cases: 3 },
