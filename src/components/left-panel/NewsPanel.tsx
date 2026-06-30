@@ -1,37 +1,24 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { groupNewsBySource } from '@/utils/riskUtils';
 import { formatRelativeTime } from '@/utils/dateUtils';
 import { sanitizeExternalUrl } from '@/utils/urlSecurity';
 import SeverityBadge from '@/components/ui/SeverityBadge';
 import { useDashboard } from '@/context/DashboardContext';
-import { useCurrentDiseaseData } from '@/hooks/useCurrentDiseaseData';
-import { fetchMergedNews } from '@/services/newsService';
-import type { NewsItem } from '@/types';
+import { useLiveTelemetry } from '@/hooks/useLiveTelemetry';
+import TelemetryStatusBar from '@/components/telemetry/TelemetryStatusBar';
 
 export default function NewsPanel() {
   const [search, setSearch] = useState('');
   const [filterSource, setFilterSource] = useState<string | null>(null);
   const { state } = useDashboard();
-  const { news: mockNews } = useCurrentDiseaseData();
-  const [liveNews, setLiveNews] = useState<NewsItem[]>(mockNews);
-  const [isLoadingLive, setIsLoadingLive] = useState(false);
-
-  // Fetch live news whenever disease changes
-  useEffect(() => {
-    setLiveNews(mockNews);   // immediately show mock while loading
-    setIsLoadingLive(true);
-    fetchMergedNews(state.currentDisease)
-      .then(setLiveNews)
-      .finally(() => setIsLoadingLive(false));
-  }, [state.currentDisease, mockNews]);
+  const { sources, news, lastPoll, isPolling, refresh } = useLiveTelemetry(state.currentDisease);
 
   const filtered = useMemo(() => {
-    let items = [...liveNews];
+    let items = [...news];
 
-    // If a country is selected, show related news first
     if (state.selectedCountry) {
       items = [
         ...items.filter((n) => n.countryCode === state.selectedCountry!.code),
@@ -54,22 +41,23 @@ export default function NewsPanel() {
     }
 
     return items;
-  }, [search, filterSource, state.selectedCountry, liveNews]);
+  }, [search, filterSource, state.selectedCountry, news]);
 
   const grouped = useMemo(() => groupNewsBySource(filtered), [filtered]);
-  const sources = useMemo(() => [...new Set(liveNews.map((n) => n.source))], [liveNews]);
+  const sources_list = useMemo(() => [...new Set(news.map((n) => n.source))], [news]);
 
   return (
     <div className="flex flex-col h-full">
-      {/* Search */}
+      {/* Live telemetry status bar */}
+      <TelemetryStatusBar
+        sources={sources}
+        lastPoll={lastPoll}
+        isPolling={isPolling}
+        onRefresh={refresh}
+      />
+
+      {/* Search & filters */}
       <div className="p-3 border-b border-white/[0.05]">
-        {/* Live indicator */}
-        {isLoadingLive && (
-          <div className="flex items-center gap-1.5 text-[9px] font-mono text-cyan-600 mb-1.5">
-            <span className="w-1 h-1 rounded-full bg-cyan-400 animate-pulse" />
-            Fetching live data...
-          </div>
-        )}
         <input
           type="text"
           placeholder="Filter news..."
@@ -93,7 +81,7 @@ export default function NewsPanel() {
           >
             All
           </button>
-          {sources.map((src) => {
+          {sources_list.map((src) => {
             const short = src.match(/\(([^)]+)\)/)?.[1] ?? src.split(' ')[0];
             return (
               <button
@@ -130,6 +118,12 @@ export default function NewsPanel() {
                     </span>
                   </div>
                   <span className="text-[10px] font-medium text-slate-400 truncate">{source}</span>
+                  {/* Live badge for real-time items */}
+                  {items[0]?.isLive && (
+                    <span className="text-[8px] font-mono text-green-500 bg-green-500/10 border border-green-500/20 px-1 py-0.5 rounded flex-shrink-0">
+                      LIVE
+                    </span>
+                  )}
                   <span className="ml-auto text-[9px] text-slate-600 font-mono flex-shrink-0">{items.length}</span>
                 </div>
 

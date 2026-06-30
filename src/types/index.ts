@@ -49,6 +49,7 @@ export interface NewsItem {
   category: string;
   severity: SeverityLabel;
   url: string | null;
+  isLive?: boolean;
 }
 
 export interface CountryOutbreak {
@@ -204,6 +205,21 @@ export interface ClusterSearchResult {
   cluster: Cluster;
   distanceKm: number;
   country: CountryOutbreak;
+}
+
+// ─── Telemetry ────────────────────────────────────────────────────────────────
+
+export type TelemetrySourceStatus = 'live' | 'polling' | 'cached' | 'error' | 'idle';
+
+export interface TelemetrySource {
+  id: string;
+  name: string;
+  shortName: string;
+  status: TelemetrySourceStatus;
+  lastUpdated: Date | null;
+  itemCount: number;
+  latencyMs: number | null;
+  error: string | null;
 }
 
 // ─── Globe Marker ─────────────────────────────────────────────────────────────
